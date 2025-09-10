@@ -35,8 +35,9 @@ erDiagram
         string Canteirista_CPF FK
     }
     CANTEIRO {
-        string Numero PK
-        string Horta_Nome FK PK
+        string ID PK
+        string Numero
+        string Horta_Nome FK
         string Tamanho
         string Localizacao
         string Canteirista_CPF FK
