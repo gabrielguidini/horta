@@ -1,76 +1,109 @@
 ```mermaid
 erDiagram
     ASSOCIACAO {
-        string CNPJ PK
-        string Nome
-        string Endereco
+        string cnpj PK
+        string nome
+        string endereco
+        string administradores
+        string tesoureiros
     }
+    
     HORTA_COMUNITARIA {
-        string Nome PK
-        string Localizacao
-        string Associacao_CNPJ FK
+        int id PK
+        string nome
+        string localizacao
+        string cnpj_associacao FK
+        string cpf_administrador_horta FK
+        string cpf_tesoureiro_horta FK
     }
-    ADMINISTRADOR {
-        string ID PK
-        string Nome
-        string Telefone
-    }
-    TESOREIRO {
-        string ID PK
-        string Nome
-        string Telefone
-    }
+    
     CANTEIRISTA {
-        string CPF PK
-        string Nome
-        string Telefone
-        string Endereco
-        string Email
-        string Horta_Nome FK
+        string cpf PK
+        string nome
+        string telefone
+        string endereco
+        string email
+        int id_horta FK
     }
+    
     DEPENDENTE {
-        string Nome PK
-        string CPF
-        string Grau_Parentesco
-        string Canteirista_CPF FK
+        int id PK
+        string nome
+        string cpf "nullable"
+        string grau_parentesco
+        string cpf_canteirista FK
     }
+    
     CANTEIRO {
-        string ID PK
-        string Numero
-        string Horta_Nome FK
-        string Tamanho
-        string Localizacao
-        string Canteirista_CPF FK
+        int id PK
+        int numero_identificador
+        string tamanho
+        string localizacao_canteiro
+        int id_horta FK
+        string cpf_proprietario FK
     }
-    FINANCEIRO {
-        string ID PK
-        string Canteirista_CPF FK
-        float ValorPago
-        float Percentual_Associacao
-        float Percentual_Horta
-        string Historico
+    
+    CONFIGURACAO_FINANCEIRA {
+        int id PK
+        int id_horta FK
+        decimal valor_mensal_canteiro
+        decimal percentual_associacao
+        decimal percentual_horta
+        date data_vigencia
+        boolean ativo
     }
+    
+    LANCAMENTO_FINANCEIRO {
+        int id PK
+        int id_horta FK
+        string cnpj_associacao FK
+        string tipo_lancamento "entrada/saida"
+        decimal valor
+        string descricao
+        date data_lancamento
+        string origem "canteirista/outros"
+        string cpf_canteirista FK "nullable"
+    }
+    
+    PAGAMENTO_CANTEIRISTA {
+        int id PK
+        string cpf_canteirista FK
+        int mes
+        int ano
+        decimal valor_pago
+        date data_pagamento
+        string status "pago/pendente/atrasado"
+    }
+    
     AUDITORIA {
-        string ID PK
-        string Associacao_CNPJ FK
-        string Horta_Nome FK
-        string Data
-        string Observacoes
+        int id PK
+        string cnpj_associacao FK
+        int id_horta FK
+        date data_auditoria
+        string auditor
+        text observacoes
+        string status "realizada/pendente"
     }
 
-    ASSOCIACAO ||--o{ HORTA_COMUNITARIA : possui
-    ASSOCIACAO ||--o{ ADMINISTRADOR : possui
-    ASSOCIACAO ||--o{ TESOREIRO : possui
-
-    HORTA_COMUNITARIA }|..|{ ADMINISTRADOR : "administradores"
-    HORTA_COMUNITARIA }|..|{ TESOREIRO : "tesoureiros"
-    HORTA_COMUNITARIA ||--o{ CANTEIRISTA : "possui"
-    HORTA_COMUNITARIA ||--o{ CANTEIRO : "possui"
-
+    %% Relacionamentos principais
+    ASSOCIACAO ||--o{ HORTA_COMUNITARIA : "possui"
+    HORTA_COMUNITARIA ||--o{ CANTEIRISTA : "vincula"
     CANTEIRISTA ||--o{ DEPENDENTE : "tem"
+    HORTA_COMUNITARIA ||--o{ CANTEIRO : "contem"
     CANTEIRISTA ||--o{ CANTEIRO : "possui"
-    CANTEIRISTA ||--o{ FINANCEIRO : "realiza"
-
-    ASSOCIACAO ||--o{ AUDITORIA : "faz auditoria"
-    HORTA_COMUNITARIA ||--o{ AUDITORIA : "é auditada"
+    
+    %% Relacionamentos financeiros
+    HORTA_COMUNITARIA ||--o{ CONFIGURACAO_FINANCEIRA : "tem_configuracao"
+    HORTA_COMUNITARIA ||--o{ LANCAMENTO_FINANCEIRO : "registra_lancamentos"
+    ASSOCIACAO ||--o{ LANCAMENTO_FINANCEIRO : "recebe_lancamentos"
+    CANTEIRISTA ||--o{ PAGAMENTO_CANTEIRISTA : "realiza_pagamentos"
+    CANTEIRISTA ||--o{ LANCAMENTO_FINANCEIRO : "gera_lancamentos"
+    
+    %% Relacionamentos de administração
+    CANTEIRISTA ||--o| HORTA_COMUNITARIA : "administra"
+    CANTEIRISTA ||--o| HORTA_COMUNITARIA : "tesouraria"
+    
+    %% Relacionamentos de auditoria
+    ASSOCIACAO ||--o{ AUDITORIA : "realiza_auditoria"
+    HORTA_COMUNITARIA ||--o{ AUDITORIA : "recebe_auditoria"
 ```
